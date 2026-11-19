@@ -187,7 +187,20 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   }
 
   const handleSubmit = (data: FilterFormData) => {
-    const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : (data.value ?? '');
+    /**
+     * Boolean toggles never hold an empty value: an untouched toggle is displayed as "False",
+     * and a toggle that has been switched holds a real boolean, which must not be discarded.
+     */
+    const isBooleanFilter = options.find((filter) => filter.name === data.name)?.type === 'boolean';
+    let value: string = '';
+
+    if (FILTERS_WITH_NO_VALUE.includes(data.filter)) {
+      value = 'true';
+    } else if (isBooleanFilter) {
+      value = String(data.value ?? false);
+    } else {
+      value = data.value ?? '';
+    }
 
     if (!value) {
       return;
